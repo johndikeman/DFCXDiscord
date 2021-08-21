@@ -1,0 +1,28 @@
+{
+  "name": "dfcxdiscord",
+  "version": "1.0.0",
+  "description": "an integration between Dialogflow CX and Discord",
+  "main": "dist/index.js",
+  "dependencies": {
+    "discord.js": "^13.1.0",
+    "dotenv": "^10.0.0",
+    "typescript": "^4.3.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "prestart": "npm run build",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johndikeman/DFCXDiscord.git"
+  },
+  "author": "john dikeman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/johndikeman/DFCXDiscord/issues"
+  },
+  "homepage": "https://github.com/johndikeman/DFCXDiscord#readme"
+}
