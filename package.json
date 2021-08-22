@@ -4,11 +4,11 @@
   "description": "an integration between Dialogflow CX and Discord",
   "main": "dist/index.js",
   "dependencies": {
+    "@google-cloud/datastore": "^6.4.8",
     "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
     "typescript": "^4.3.5"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
