@@ -49,11 +49,16 @@ client.on("messageCreate", async (message: Message) => {
   } else {
     // if the message doesn't have the activation phrase check if it's a reply to an existing message or has the bot tagged
     // TODO: separate these all out into their own variables to help debugging this
-    if(client.user !== null && (mentions.repliedUser?.equals(client.user) || content.includes(client.user.toString()))){
+    const mentioned = mentions.repliedUser;
+    const botUser = client.user;
+    // ternary to guarantee it's not null
+    const tagString = botUser ? botUser.id : "";
+
+    if(botUser !== null && (mentioned?.equals(botUser) || content.includes(tagString))){
       // TODO: this is also where we will check if there's an existing session in our in-mem cache
       // (all we're trying to do is prevent unnecessary calls to the database)
       const sesh = sessionCache.get(author)
-      if(sesh){
+      if(sesh !== undefined){
         let res = await sesh.getResponse(content);
         await message.reply(res);
       } else {
