@@ -31,48 +31,34 @@ client.once("ready", () => {
 client.on("messageCreate", async (message: Message) => {
 
   const {content, author, mentions} = message;
-  // do a test activation phrase
-  if(content.includes("hey test bot")){
+  // if the message doesn't have the activation phrase check if it's a reply to an existing message or has the bot tagged
+  // TODO: separate these all out into their own variables to help debugging this
+  const mentioned = mentions.repliedUser;
+  const botUser = client.user;
+  // ternary to guarantee it's not null
+  const tagString = botUser ? botUser.id : "";
+
+  // each of the trigger conditions
+  const hasActivationPhrase = content.includes("hey test bot")
+  const isReplyToBot = botUser ? mentioned?.equals(botUser) : false;
+  const botIsTagged = content.includes(tagString);
+
+  if( hasActivationPhrase || isReplyToBot || botIsTagged ) {
     // first check if they have a session already. if they do and they're just being weird or malicious, prompt them to reply to a message to continue
-    if(sessionCache.get(author)){
-      await message.reply("hey! reply to this message to keep going 🤠");
-    } else {
+    let userSession = sessionCache.get(author)
+    if(!userSession){
       // if they don't have a session, make a new one and add it to the cache
-      // TODO: change this to the actual new Dialogflow session object, add error handling too
-      let sesh = mockDFSessionObject;
-      sessionCache.add(author, sesh);
-
-      // get the response from the session object
-      const res = await sesh.getResponse(message.content);
-      await message.reply(res);
-    }
-  } else {
-    // if the message doesn't have the activation phrase check if it's a reply to an existing message or has the bot tagged
-    // TODO: separate these all out into their own variables to help debugging this
-    const mentioned = mentions.repliedUser;
-    const botUser = client.user;
-    // ternary to guarantee it's not null
-    const tagString = botUser ? botUser.id : "";
-
-    if(botUser !== null && (mentioned?.equals(botUser) || content.includes(tagString))){
-      // TODO: this is also where we will check if there's an existing session in our in-mem cache
-      // (all we're trying to do is prevent unnecessary calls to the database)
-      const sesh = sessionCache.get(author)
-      if(sesh !== undefined){
-        let res = await sesh.getResponse(content);
-        await message.reply(res);
-      } else {
-        // if they don't have a session, make a new one and add it to the cache
-        // TODO: change this to the actual new Dialogflow session object, add error handling too
-        let sesh = mockDFSessionObject;
-        sessionCache.add(author, sesh);
-
-        // get the response from the session object
-        const res = await sesh.getResponse(content);
-        await message.reply(res);
-      }
+      // TODO: change this to the actual new Dialogflow session object, add error handling too, make it a promise
+      userSession = mockDFSessionObject;
+      sessionCache.add(author, userSession);
+      console.log("new session created!");
     }
     
+    // TODO: check if we're within the rate limit
+    // get the response from the session object
+    const res = await userSession.getResponse(message.content);
+    await message.reply(res);
+
   }
   console.log(message.content, message.createdAt, message.author.username);
   // TODO: make this work with the datastore api
