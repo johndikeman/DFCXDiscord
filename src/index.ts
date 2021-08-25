@@ -2,6 +2,8 @@ require("dotenv").config();
 import { Client, Intents, Interaction, Message,} from "discord.js";
 import { Datastore } from "@google-cloud/datastore";
 import SimpleMemCache from "./SimpleMemCache";
+import { DateTime } from "luxon";
+import { DFSessionWrapper } from "./DFSessionWrapper";
 
 const datastoreClient = new Datastore({ keyFilename: process.env.IAM_KEY_FILE })
 // const permissionsString = process.env.DISCORD_PERMISSIONS_INTEGER;
@@ -15,13 +17,6 @@ const datastoreClient = new Datastore({ keyFilename: process.env.IAM_KEY_FILE })
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
 const sessionCache = new SimpleMemCache(0.1);
-
-class DFSessionWrapper {
-  async getResponse(utterance: string): Promise<string> {
-    const testReplyOptions = ["heya!", "OwO what's this", "sure dude"]
-    return testReplyOptions[Math.floor(Math.random() * testReplyOptions.length)];
-  }
-}
 
 client.once("ready", () => {
   console.log("client intialised!!");
@@ -53,7 +48,7 @@ client.on("messageCreate", async (message: Message) => {
       console.log("new session created!");
     }
     
-    // TODO: check if we're within the rate limit
+    // TODO: check if we're within the rate limit (done in sessionwrapper)
     // get the response from the session object
     const res = await userSession.getResponse(message.content);
     await message.reply(res);

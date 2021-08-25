@@ -7,6 +7,7 @@
     "@google-cloud/datastore": "^6.4.8",
     "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
+    "luxon": "^2.0.2",
     "typescript": "^4.3.5"
   },
   "scripts": {
@@ -24,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/johndikeman/DFCXDiscord/issues"
   },
-  "homepage": "https://github.com/johndikeman/DFCXDiscord#readme"
+  "homepage": "https://github.com/johndikeman/DFCXDiscord#readme",
+  "devDependencies": {
+    "@types/luxon": "^2.0.0"
+  }
 }
