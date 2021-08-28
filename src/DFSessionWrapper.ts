@@ -54,8 +54,25 @@ export class DFSessionWrapper {
     } else {
       const testReplyOptions = ["heya!", "OwO what's this", "sure dude"];
       this.lastMessageTime = DateTime.now();
+      
+      this.writeMessageToDatastore(utterance);
+
+      // TODO: when we get the pageId back from Df, just set this.sessionData and change writeSessionToDatastore to upsert and call it again :)
       return testReplyOptions[Math.floor(Math.random() * testReplyOptions.length)];
     }
+  }
+
+  private writeMessageToDatastore(utterance: string) {
+    const messageData: MessageEntity = {
+      createdAt: new Date(),
+      sessionId: this.sessionId,
+      content: utterance,
+    };
+
+    this.datastoreClient.insert({
+      key: this.datastoreClient.key(["Message"]),
+      data: messageData
+    });
   }
 
   private async writeSessionToDatastore() {
