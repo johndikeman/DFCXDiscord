@@ -1,9 +1,12 @@
 require("dotenv").config();
 import { Client, Intents, Interaction, Message,} from "discord.js";
 import { Datastore } from "@google-cloud/datastore";
+import { SessionsClient } from '@google-cloud/dialogflow-cx';
 import SimpleMemCache from "./SimpleMemCache";
 import { DFSessionWrapper } from "./DFSessionWrapper";
 
+
+const dialogflowClient = new SessionsClient({ keyFilename: process.env.IAM_KEY_FILE, apiEndpoint: process.env.DF_AGENT_API_ENDPOINT });
 const datastoreClient = new Datastore({ keyFilename: process.env.IAM_KEY_FILE })
 // const permissionsString = process.env.DISCORD_PERMISSIONS_INTEGER;
 // let discordBitPermissions;
@@ -55,7 +58,7 @@ client.on("messageCreate", async (message: Message) => {
     if(!userSession){
       // if they don't have a session, make a new one and add it to the cache
       // TODO: change this to the actual new Dialogflow session object, add error handling too, make it a promise
-      userSession = new DFSessionWrapper(datastoreClient, author);
+      userSession = new DFSessionWrapper(datastoreClient, author, dialogflowClient);
       sessionCache.add(author, userSession);
       console.log("new session created!");
     }
@@ -63,17 +66,10 @@ client.on("messageCreate", async (message: Message) => {
     // TODO: check if we're within the rate limit (done in sessionwrapper)
     // get the response from the session object
     const res = await userSession.getResponse(message.content);
-    await message.reply({content: res});
+    await message.reply({content: res.text, components: res.payload});
 
   }
   console.log(message.content, message.createdAt, message.author.username);
-  // TODO: make this work with the datastore api
-  // datastoreClient.collection("messages").add({
-  //   content: message.content,
-  //   createdAt: message.createdAt,
-  //   senderUsername: message.author.username,
-  //   senderId: message.author.id
-  // })
 })
 
 client.on("interactionCreate", async (interaction: Interaction) => {
