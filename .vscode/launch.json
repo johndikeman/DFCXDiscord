@@ -7,6 +7,13 @@
       "request": "launch",
       "command": "npm run start",
       "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Docker Node.js Launch",
+      "type": "docker",
+      "request": "launch",
+      "preLaunchTask": "docker-run: debug",
+      "platform": "node"
     }
   ]
 }
