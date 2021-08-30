@@ -3,6 +3,8 @@ import { DateTime } from "luxon";
 import superchargeStrings from "@supercharge/strings";
 import { MessageActionRow, MessageActionRowOptions, User } from "discord.js";
 import { SessionsClient} from "@google-cloud/dialogflow-cx";
+import { google } from "@google-cloud/dialogflow-cx/build/protos/protos";
+import { Struct, struct } from "pb-util/build";
 
 const SECONDS_BETWEEN_MESSAGES = 2; 
 
@@ -114,7 +116,9 @@ export class DFSessionWrapper {
             // concatenate the return object with the text we get back
             returnObject.text += response.text?.text?.join(" ");
           } else if(response.payload){
-            returnObject.payload?.push(response.payload);
+            const decoded = struct.decode(response.payload as Struct)
+            console.log(decoded);
+            returnObject.payload?.push(decoded);
           }
         } 
       }

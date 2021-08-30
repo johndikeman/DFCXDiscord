@@ -1,9 +1,10 @@
 require("dotenv").config();
-import { Client, Intents, Interaction, Message,} from "discord.js";
+import { Client, Intents, Interaction, Message, MessageActionRow, MessageComponentInteraction,} from "discord.js";
 import { Datastore } from "@google-cloud/datastore";
 import { SessionsClient } from '@google-cloud/dialogflow-cx';
 import SimpleMemCache from "./SimpleMemCache";
 import { DFSessionWrapper } from "./DFSessionWrapper";
+import { Struct, struct } from 'pb-util';
 
 
 const dialogflowClient = new SessionsClient({ keyFilename: process.env.IAM_KEY_FILE, apiEndpoint: process.env.DF_AGENT_API_ENDPOINT });
@@ -66,14 +67,34 @@ client.on("messageCreate", async (message: Message) => {
     // TODO: check if we're within the rate limit (done in sessionwrapper)
     // get the response from the session object
     const res = await userSession.getResponse(message.content);
-    await message.reply({content: res.text, components: res.payload});
+    try {
+      await message.reply({content: res.text, components: res.payload}); 
+    } catch(error){
+      console.log(error);
+    }
 
   }
   console.log(message.content, message.createdAt, message.author.username);
 })
 
 client.on("interactionCreate", async (interaction: Interaction) => {
-  console.log(interaction.type, interaction.user.username,);
+  if (interaction.isMessageComponent()){
+    const customId = (interaction as MessageComponentInteraction).customId;
+    const author = interaction.user;
+    let userSession = sessionCache.get(author)
+
+    if(userSession){
+      // TODO: check if we're within the rate limit (done in sessionwrapper)
+      // get the response from the session object
+      const res = await userSession.getResponse(customId);
+      try {
+        await interaction.reply({content: res.text, components: res.payload}); 
+      } catch(error){
+        console.log(error);
+      }
+    }
+    console.log(interaction.type, interaction.user.username, customId);
+  }
 })
 
 client.login(process.env.DISCORD_BOT_TOKEN);
