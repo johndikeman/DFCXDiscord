@@ -82,8 +82,9 @@ client.on("interactionCreate", async (interaction: Interaction) => {
     const customId = (interaction as MessageComponentInteraction).customId;
     const author = interaction.user;
     let userSession = sessionCache.get(author)
-
-    if(userSession){
+    let mentions = interaction.message.mentions;
+    // to respond to the interaction, the user needs to have a session and be the one the bot is talking to
+    if(userSession && "users" in mentions && mentions.users.get(author.id) !== undefined){
       // TODO: check if we're within the rate limit (done in sessionwrapper)
       // get the response from the session object
       const res = await userSession.getResponse(customId);
@@ -92,7 +93,11 @@ client.on("interactionCreate", async (interaction: Interaction) => {
       } catch(error){
         console.log(error);
       }
+    } else{
+      // if they don't meet those requests, this should mean that there's no "interaction failed" message
+      interaction.deferReply();
     }
+  
     console.log(interaction.type, interaction.user.username, customId);
   }
 })
