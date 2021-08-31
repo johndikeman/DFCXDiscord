@@ -8,3 +8,4 @@ COPY . .
 RUN chown -R node /usr/src/app
 USER node
 CMD ["npm", "start"]
+
