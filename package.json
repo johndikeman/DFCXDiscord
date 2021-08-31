@@ -25,7 +25,7 @@
     "url": "git+https://github.com/johndikeman/DFCXDiscord.git"
   },
   "author": "john dikeman",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/johndikeman/DFCXDiscord/issues"
   },
