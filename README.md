@@ -16,7 +16,7 @@ Installation
 
 2. The integration expects a few values to be provided in a .env file:
 
-`DISCORD_BOT_TOKEN`: The token for the Discord bot you want to use the integration for.
+`DISCORD_BOT_TOKEN`: The token for the Discord bot you want to use the integration for. (If you'd like instructions for setting up the Discord bot itself, getting the token, and adding it to a server, follow steps 2-4 of [these](https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/) instructions)
 
 `GCLOUD_PROJECT`: The name of the GCP project containing your Dialogflow agent and Datastore instance.
 
