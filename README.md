@@ -6,7 +6,7 @@ Features
 -
 - Tag or reply to your bot in a server to start a conversation, just like a real user
 - Sessions and messages with your bot are stored in Firestore (in Datastore mode) for analytics and debugging
-- Support for passing user variables to the Dialogflow session -- currently the username and ID of the user.
+- Support for passing user variables to the Dialogflow session -- currently the username (`authorName`) and ID (`authorID`) of the Discord user engaging with the bot
 - Support for Discord interactive components through custom payloads that conform to the [Discord Message Component](https://discord.com/developers/docs/interactions/message-components) format. The `custom_id` field in the selectable items is passed back to the session as an utterance when it's selected, you can capture it with a custom entity.
 
 Installation
