@@ -4,10 +4,9 @@ import { Datastore } from "@google-cloud/datastore";
 import { SessionsClient } from '@google-cloud/dialogflow-cx';
 import SimpleMemCache from "./SimpleMemCache";
 import { DFSessionWrapper } from "./DFSessionWrapper";
-import { Struct, struct } from 'pb-util';
 
 
-const dialogflowClient = new SessionsClient({ keyFilename: process.env.IAM_KEY_FILE, apiEndpoint: process.env.DF_AGENT_API_ENDPOINT });
+const dialogflowClient = new SessionsClient({ keyFilename: process.env.IAM_KEY_FILE, apiEndpoint: `${process.env.DF_AGENT_LOCATION}-dialogflow.googleapis.com` });
 const datastoreClient = new Datastore({ keyFilename: process.env.IAM_KEY_FILE })
 // const permissionsString = process.env.DISCORD_PERMISSIONS_INTEGER;
 // let discordBitPermissions;
