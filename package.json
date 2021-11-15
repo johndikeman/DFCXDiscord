@@ -6,6 +6,7 @@
   "dependencies": {
     "@google-cloud/datastore": "^6.4.8",
     "@google-cloud/dialogflow-cx": "^2.13.0",
+    "@google-cloud/secret-manager": "^3.10.1",
     "@supercharge/strings": "^1.19.0",
     "@types/luxon": "^2.0.1",
     "discord.js": "^13.1.0",

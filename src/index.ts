@@ -1,25 +1,29 @@
-require("dotenv").config();
 import { Client, Intents, Interaction, Message, MessageActionRow, MessageComponentInteraction,} from "discord.js";
 import { Datastore } from "@google-cloud/datastore";
 import { SessionsClient } from '@google-cloud/dialogflow-cx';
 import SimpleMemCache from "./SimpleMemCache";
 import { DFSessionWrapper } from "./DFSessionWrapper";
+import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 
-
-const dialogflowClient = new SessionsClient({ keyFilename: process.env.IAM_KEY_FILE, apiEndpoint: `${process.env.DF_AGENT_LOCATION}-dialogflow.googleapis.com` });
-const datastoreClient = new Datastore({ keyFilename: process.env.IAM_KEY_FILE })
-// const permissionsString = process.env.DISCORD_PERMISSIONS_INTEGER;
-// let discordBitPermissions;
-
-// if(permissionsString !== undefined){
-//   discordBitPermissions = parseInt(permissionsString);
-// } else {
-//   throw Error("DISCORD_PERMISSIONS_INTEGER not specified in .env, terminating!");
-// }
-
+const secretsClient = new SecretManagerServiceClient();
+const dialogflowClient = new SessionsClient({apiEndpoint: `${process.env.DF_AGENT_LOCATION}-dialogflow.googleapis.com` });
+const datastoreClient = new Datastore()
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
 const sessionCache = new SimpleMemCache();
 
+
+async function setupClients() {
+  const [discord_token_version] = await secretsClient.accessSecretVersion({
+      name: "DISCORD_BOT_TOKEN"
+    });
+ 
+  const discord_token = discord_token_version.payload?.data?.toString();
+  if (discord_token === undefined){
+    throw new Error("Uh-oh! Couldn't get your Discord token, do you have DISCORD_BOT_TOKEN in secrets manager?");
+  }
+
+  client.login(discord_token);
+}
 
 // const testComponent = {
 //   "type": 1,
@@ -101,4 +105,4 @@ client.on("interactionCreate", async (interaction: Interaction) => {
   }
 })
 
-client.login(process.env.DISCORD_BOT_TOKEN);
+setupClients();

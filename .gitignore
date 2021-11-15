@@ -4,3 +4,4 @@ dist
 key.json
 .vscode/*
 docker-compose.debug.yml
+.DS_Store
