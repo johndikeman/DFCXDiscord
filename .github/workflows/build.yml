@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - '**'
+      - 'main'
 
 jobs:
   build:
@@ -14,6 +14,7 @@ jobs:
       BRANCH: ${GITHUB_REF##*/}
       SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
       PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      VM_NAME: ${{ secrets.VM_NAME}}
 
     steps:
       - name: Checkout
@@ -37,3 +38,7 @@ jobs:
       - name: Build
         run: |-
           docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
+
+      - name: update VM
+        run: |
+          gcloud compute instances update-container $VM_NAME --container-image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
