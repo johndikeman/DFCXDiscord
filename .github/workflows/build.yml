@@ -1,44 +1,59 @@
-name: Build
+# Copyright 2020 Google, LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Build and Deploy to Google Compute Engine
+
 on:
   push:
     branches:
-      - 'main'
+    - master
+
+env:
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  GCE_INSTANCE: bot-vm  # TODO: update to instance name
+  GCE_INSTANCE_ZONE: us-central1-a   # TODO: update to instance zone
 
 jobs:
-  build:
-    name: Build image
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
 
-    env:
-      HASH: $(git rev-parse --short "$GITHUB_SHA")
-      BRANCH: ${GITHUB_REF##*/}
-      SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
-      PROJECT_ID: ${{ secrets.PROJECT_ID }}
-      VM_NAME: ${{ secrets.VM_NAME}}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 
-      # Setup gcloud CLI
-      - uses: google-github-actions/setup-gcloud@master
-        with:
-          service_account_key: ${{ secrets.DEVOPS_SERVICE_ACCOUNT_KEY }}
-          project_id: ${{ secrets.PROJECT_ID }}
-          export_default_credentials: true
+    # Setup gcloud CLI
+    - uses: google-github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.DEVOPS_SERVICE_ACCOUNT_KEY }}
+        project_id: ${{ secrets.GCE_PROJECT }}
 
-      # Build docker image
-      - name: Image
-        run: |-
-          docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA .
-      # Configure docker to use the gcloud command-line tool as a credential helper
-      - run: |
-          gcloud auth configure-docker -q
-      # Push image to Google Container Registry
-      - name: Build
-        run: |-
-          docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
-
-      - name: update VM
-        run: |
-          gcloud compute instances update-container $VM_NAME --container-image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
+    # Configure Docker to use the gcloud command-line tool as a credential
+    # helper for authentication
+    - run: |-
+        gcloud --quiet auth configure-docker
+    # Build the Docker image
+    - name: Build
+      run: |-
+        docker build --tag "gcr.io/$PROJECT_ID/$GCE_INSTANCE-image:$GITHUB_SHA" .
+    # Push the Docker image to Google Container Registry
+    - name: Publish
+      run: |-
+        docker push "gcr.io/$PROJECT_ID/$GCE_INSTANCE-image:$GITHUB_SHA"
+    - name: Deploy
+      run: |-
+        gcloud compute instances update-container "$GCE_INSTANCE" \
+          --zone "$GCE_INSTANCE_ZONE" \
+          --container-image "gcr.io/$PROJECT_ID/$GCE_INSTANCE-image:$GITHUB_SHA"
