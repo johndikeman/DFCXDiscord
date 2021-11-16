@@ -38,7 +38,7 @@ jobs:
       with:
         version: '290.0.1'
         service_account_key: ${{ secrets.DEVOPS_SERVICE_ACCOUNT_KEY }}
-        project_id: $PROJECT_ID
+        project_id: ${{ secrets.PROJECT_ID }}
 
     # Configure Docker to use the gcloud command-line tool as a credential
     # helper for authentication
