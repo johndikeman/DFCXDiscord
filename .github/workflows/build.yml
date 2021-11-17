@@ -23,6 +23,8 @@ env:
   PROJECT_ID: ${{ secrets.PROJECT_ID }}
   GCE_INSTANCE: bot-vm  # TODO: update to instance name
   GCE_INSTANCE_ZONE: us-central1-a   # TODO: update to instance zone
+  DISCORD_TOKEN_SECRET: ${{ secrets.DISCORD_TOKEN_SECRET}
+  DF_AGENT_LOCATION: us-central1
 
 jobs:
   setup-build-publish-deploy:
@@ -56,5 +58,5 @@ jobs:
       run: |-
         gcloud compute instances update-container "$GCE_INSTANCE" \
           --zone "$GCE_INSTANCE_ZONE" \
-          --container-env=[DISCORD_TOKEN_SECRET=${{ secrets.DISCORD_TOKEN_SECRET}},DF_AGENT_LOCATION=${{secrets.DF_AGENT_LOCATION}}] \
+          --container-env="DISCORD_TOKEN_SECRET=$DISCORD_TOKEN_SECRET,DF_AGENT_LOCATION=$DF_AGENT_LOCATION" \
           --container-image "gcr.io/$PROJECT_ID/$GCE_INSTANCE-image:$GITHUB_SHA"
