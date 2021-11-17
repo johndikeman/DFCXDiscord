@@ -56,4 +56,5 @@ jobs:
       run: |-
         gcloud compute instances update-container "$GCE_INSTANCE" \
           --zone "$GCE_INSTANCE_ZONE" \
+          --container-env=[DISCORD_TOKEN_SECRET=${{ secrets.DISCORD_TOKEN_SECRET}},DF_AGENT_LOCATION=${{secrets.DF_AGENT_LOCATION}}] \
           --container-image "gcr.io/$PROJECT_ID/$GCE_INSTANCE-image:$GITHUB_SHA"
