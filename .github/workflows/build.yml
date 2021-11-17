@@ -23,7 +23,7 @@ env:
   PROJECT_ID: ${{ secrets.PROJECT_ID }}
   GCE_INSTANCE: bot-vm  # TODO: update to instance name
   GCE_INSTANCE_ZONE: us-central1-a   # TODO: update to instance zone
-  DISCORD_TOKEN_SECRET: ${{ secrets.DISCORD_TOKEN_SECRET}
+  DISCORD_TOKEN_SECRET: ${{ secrets.DISCORD_TOKEN_SECRET}}
   DF_AGENT_LOCATION: us-central1
 
 jobs:
