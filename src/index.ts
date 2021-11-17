@@ -14,7 +14,7 @@ const sessionCache = new SimpleMemCache();
 
 async function setupClients() {
   const [discord_token_version] = await secretsClient.accessSecretVersion({
-      name: "DISCORD_BOT_TOKEN"
+      name: process.env.DISCORD_TOKEN_SECRET
     });
  
   const discord_token = discord_token_version.payload?.data?.toString();
