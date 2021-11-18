@@ -4,7 +4,6 @@ import { SessionsClient } from '@google-cloud/dialogflow-cx';
 import SimpleMemCache from "./SimpleMemCache";
 import { DFSessionWrapper } from "./DFSessionWrapper";
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
-import { Logging } from '@google-cloud/logging';
 
 const secretsClient = new SecretManagerServiceClient();
 const dialogflowClient = new SessionsClient({apiEndpoint: `${process.env.DF_AGENT_LOCATION}-dialogflow.googleapis.com` });
@@ -12,29 +11,7 @@ const datastoreClient = new Datastore()
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
 const sessionCache = new SimpleMemCache();
 
-const loggingClient = new Logging();
-
-async function writeLog(text: string) {
-
-  // Selects the log to write to
-  const log = loggingClient.log("botlog");
-
-  // The metadata associated with the entry
-  const metadata = {
-    resource: {type: 'global'},
-    // See: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
-    severity: 'INFO',
-  };
-
-  // Prepares a log entry
-  const entry = log.entry(metadata, text);
-
-    // Writes the log entry
-  await log.write(entry);  
-}
-
-// if we're in prod, use this function to write to the GCP logs instead
-const log = process.env.NODE_ENV === "production" ? writeLog : console.log;
+import { log } from "./loggingClient";
 
 async function setupClients() {
   const [discord_token_version] = await secretsClient.accessSecretVersion({
