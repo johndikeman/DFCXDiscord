@@ -46,7 +46,7 @@ async function setupClients() {
     throw new Error("Uh-oh! Couldn't get your Discord token, do you have DISCORD_BOT_TOKEN in secrets manager?");
   }
 
-  client.login(discord_token);
+  await client.login(discord_token);
 }
 
 // const testComponent = {
