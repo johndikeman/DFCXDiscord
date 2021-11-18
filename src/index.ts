@@ -4,6 +4,7 @@ import { SessionsClient } from '@google-cloud/dialogflow-cx';
 import SimpleMemCache from "./SimpleMemCache";
 import { DFSessionWrapper } from "./DFSessionWrapper";
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
+import { Logging } from '@google-cloud/logging';
 
 const secretsClient = new SecretManagerServiceClient();
 const dialogflowClient = new SessionsClient({apiEndpoint: `${process.env.DF_AGENT_LOCATION}-dialogflow.googleapis.com` });
@@ -11,6 +12,29 @@ const datastoreClient = new Datastore()
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
 const sessionCache = new SimpleMemCache();
 
+const loggingClient = new Logging();
+
+async function writeLog(text: string) {
+
+  // Selects the log to write to
+  const log = loggingClient.log("botlog");
+
+  // The metadata associated with the entry
+  const metadata = {
+    resource: {type: 'global'},
+    // See: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
+    severity: 'INFO',
+  };
+
+  // Prepares a log entry
+  const entry = log.entry(metadata, text);
+
+    // Writes the log entry
+  await log.write(entry);  
+}
+
+// if we're in prod, use this function to write to the GCP logs instead
+const log = process.env.NODE_ENV === "production" ? writeLog : console.log;
 
 async function setupClients() {
   const [discord_token_version] = await secretsClient.accessSecretVersion({
@@ -38,7 +62,7 @@ async function setupClients() {
 // }
 
 client.once("ready", () => {
-  console.log("client intialised!!");
+  log("client intialised!!");
 })
 
 client.on("messageCreate", async (message: Message) => {
@@ -64,7 +88,7 @@ client.on("messageCreate", async (message: Message) => {
       // TODO: change this to the actual new Dialogflow session object, add error handling too, make it a promise
       userSession = new DFSessionWrapper(datastoreClient, author, dialogflowClient);
       sessionCache.add(author, userSession);
-      console.log("new session created!");
+      log("new session created!");
     }
     
     // TODO: check if we're within the rate limit (done in sessionwrapper)
@@ -73,11 +97,11 @@ client.on("messageCreate", async (message: Message) => {
     try {
       await message.reply({content: res.text, components: res.payload}); 
     } catch(error){
-      console.log(error);
+      log(error);
     }
 
   }
-  console.log(message.content, message.createdAt, message.author.username);
+  log(`${message.createdAt}, ${message.content}, ${message.author.username}`);
 })
 
 client.on("interactionCreate", async (interaction: Interaction) => {
@@ -94,14 +118,14 @@ client.on("interactionCreate", async (interaction: Interaction) => {
       try {
         await interaction.reply({content: res.text, components: res.payload}); 
       } catch(error){
-        console.log(error);
+        log(error);
       }
     } else{
       // if they don't meet those requests, this should mean that there's no "interaction failed" message
       interaction.deferReply();
     }
   
-    console.log(interaction.type, interaction.user.username, customId);
+    log(`type: ${interaction.type}, username: ${interaction.user.username}, customid: ${customId}`);
   }
 })
 
