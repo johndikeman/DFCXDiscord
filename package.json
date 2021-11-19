@@ -20,7 +20,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
     "prestart": "npm run build",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "start-dev":"tsnd --require dotenv/config --respawn src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -31,5 +32,8 @@
   "bugs": {
     "url": "https://github.com/johndikeman/DFCXDiscord/issues"
   },
-  "homepage": "https://github.com/johndikeman/DFCXDiscord#readme"
+  "homepage": "https://github.com/johndikeman/DFCXDiscord#readme",
+  "devDependencies": {
+    "ts-node-dev": "^1.1.8"
+  }
 }

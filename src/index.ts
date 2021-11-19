@@ -29,14 +29,19 @@ const sessionCache = new SimpleMemCache();
 import { log } from "./loggingClient";
 
 async function setupClients() {
-  const [discord_token_version] = await secretsClient.accessSecretVersion({
-    name: process.env.DISCORD_TOKEN_SECRET,
-  });
+  let discord_token: string | undefined;
+  if(process.env.NODE_ENV === "production"){
+    const [discord_token_version] = await secretsClient.accessSecretVersion({
+      name: process.env.DISCORD_TOKEN_SECRET,
+    });
+    discord_token = discord_token_version.payload?.data?.toString();
+  } else {
+    discord_token = process.env.DISCORD_BOT_TOKEN;
+  }
 
-  const discord_token = discord_token_version.payload?.data?.toString();
   if (discord_token === undefined) {
     throw new Error(
-      "Uh-oh! Couldn't get your Discord token, do you have DISCORD_BOT_TOKEN in secrets manager?"
+      "Uh-oh! Couldn't get your Discord token, do you have DISCORD_BOT_TOKEN in secrets manager/as an environment var?"
     );
   }
 
